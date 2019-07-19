@@ -24,21 +24,24 @@ public class SheetParam implements Serializable {
 
     /**
      * 标题默认所在行数
-     * @return
      */
     Integer titleIndex;
 
     /**
-     * 数据默认开始读取插入行数
-     * @return
+     * 数据默认开始读取/插入行数
      */
     Integer startIndex;
 
     /**
-     * 每次读取条数限制
-     * @return
+     * 每次读取/插入条数限制
      */
     Integer length;
+
+    /**
+     * 如果条数超过读取/插入条数限制，是否采用兼容模式，默认不采用
+     * 该模式下超过读取/插入条数限制，不会抛出异常，只会读取/插入最大限制数据量
+     */
+    boolean compatible;
 
     /**
      * 	存储字段和Excel列的对应关系

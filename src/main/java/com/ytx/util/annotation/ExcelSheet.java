@@ -15,24 +15,26 @@ import java.lang.annotation.*;
 public @interface ExcelSheet {
     /**
      * 读取的sheetIndex
-     * @return
      */
     int sheetIndex();
     /**
      * 标题默认所在行数
-     * @return
      */
     int titleIndex() default 0;
 
     /**
      * 数据默认开始读取插入行数
-     * @return
      */
     int startIndex() default 1;
 
     /**
-     * 每次读取条数限制
-     * @return
+     * 每次读取/插入条数限制
      */
     int length() ;
+
+    /**
+     * 如果条数超过读取/插入条数限制，是否采用兼容模式，，默认不采用
+     * 如果为true,不会抛出异常，只会读取/插入最大限制数据量
+     */
+    boolean compatible() default false;
 }

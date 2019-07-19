@@ -2,6 +2,7 @@ package com.ytx.util;
 
 import com.ytx.util.entity.SheetParam;
 import com.ytx.util.entity.TestEntity;
+import com.ytx.util.util.ExcelImportUtil;
 import com.ytx.util.util.ExcelUtil;
 import org.junit.Test;
 
@@ -20,9 +21,17 @@ public class ExcelImportTest {
     @Test
     public void downLoadTest() {
         SheetParam sheetParam = new SheetParam();
-        sheetParam.setSheetIndex(0);
+//        sheetParam.setSheetIndex(0);
         sheetParam.setTitleIndex(2);
-        List<TestEntity> list = ExcelUtil.readExcel("D:\\Projects\\ExcelUtil\\src\\test\\resources\\test.xlsx", TestEntity.class,sheetParam);
+//        sheetParam.setStartIndex(3);
+        sheetParam.setLength(2);
+        sheetParam.setCompatible(true);
+        SheetParam sheetParam1 = new SheetParam();
+        sheetParam1.setSheetIndex(1);
+//        sheetParam1.setTitleIndex(0);
+//        sheetParam.setStartIndex(3);
+//        sheetParam.setLength(3);
+        List<TestEntity> list = ExcelImportUtil.readExcel("D:\\Projects\\ExcelUtil\\src\\test\\resources\\test.xlsx", TestEntity.class,sheetParam,sheetParam1);
         for (TestEntity entity:list) {
             System.out.println(entity.toString());
         }
