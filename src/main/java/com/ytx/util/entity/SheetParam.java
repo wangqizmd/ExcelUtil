@@ -23,6 +23,11 @@ public class SheetParam implements Serializable {
     int sheetIndex;
 
     /**
+     * 读取的sheet name
+     */
+    String sheetName;
+
+    /**
      * 标题默认所在行数
      */
     Integer titleIndex;

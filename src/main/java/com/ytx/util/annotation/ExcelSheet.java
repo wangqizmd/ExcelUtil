@@ -16,7 +16,13 @@ public @interface ExcelSheet {
     /**
      * 读取的sheetIndex
      */
-    int sheetIndex();
+    int sheetIndex() default 0;
+
+    /**
+     * 读取的sheetName
+     * @return
+     */
+    String sheetName() default "";
     /**
      * 标题默认所在行数
      */
@@ -30,7 +36,7 @@ public @interface ExcelSheet {
     /**
      * 每次读取/插入条数限制
      */
-    int length() ;
+    int length() default 0;
 
     /**
      * 如果条数超过读取/插入条数限制，是否采用兼容模式，，默认不采用

@@ -1,8 +1,6 @@
 package com.ytx.util.util;
 
-import com.ytx.util.annotation.Excel;
 import com.ytx.util.annotation.ExcelField;
-import com.ytx.util.annotation.ExcelSheet;
 import com.ytx.util.entity.ExcelParam;
 import com.ytx.util.entity.SheetParam;
 import com.ytx.util.exception.ExcelException;
@@ -15,8 +13,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -123,30 +119,40 @@ public class ExcelImportUtil {
         excelParam.setClazz(clazz);
         excelParam.setSheetParams(sheetParams);
         ExcelUtil.getExcelAnnotation(excelParam);
+        int numberOfSheets = wb.getNumberOfSheets();
         //根据参数读取sheet，如果sheetIndex为空，读取全部,否则根据数组读取
         if(excelParam.getSheetParams() == null || excelParam.getSheetParams().length == 0){
-            for (int sheetNum = 0; sheetNum < wb.getNumberOfSheets(); sheetNum++) {
+            for (int sheetNum = 0; sheetNum < numberOfSheets; sheetNum++) {
                 //设置当前读取的sheet对象为默认对象
                 excelParam.setSheetParam(initSheetParam);
                 result.addAll(readSheet(wb.getSheetAt(sheetNum), excelParam));
             }
         }else{
-            //判断sheet是否重复
-            //如果只有一个SheetParam，则不校验，如果多个则校验是否为空，是否重复
-            if(excelParam.getSheetParams().length > 1){
-                Set set = new HashSet();
-                for (SheetParam sheetParam: excelParam.getSheetParams()) {
-                    int index = sheetParam.getSheetIndex();
-                    if(!set.add(index)){
-                        throw new ExcelException("同时读取多个sheet，sheetId不能为空或者重复");
+            //判断sheet，校验是否为空，是否重复
+            Set set = new HashSet();
+            for (SheetParam sheetParam: excelParam.getSheetParams()) {
+                int index = sheetParam.getSheetIndex();
+                String name = sheetParam.getSheetName();
+                Sheet sheet = null;
+                if(StringUtils.isNotEmpty(name)){
+                    sheet = wb.getSheet(name);
+                }
+                if(sheet==null){
+                    if(numberOfSheets<=index){
+                        throw new ExcelException("sheetIndex不能越界");
+                    }
+                    sheet = wb.getSheetAt(index);
+                }
+                if(!set.add(sheet)){
+                    if(StringUtils.isNotEmpty(name)){
+                        throw new ExcelException("同时读取多个sheet，sheet不能重复");
+                    }else {
+                        throw new ExcelException("同时读取多个sheet，sheet Index不能为空或者重复");
                     }
                 }
-            }
-            for (int sheetNum = 0; sheetNum < excelParam.getSheetParams().length; sheetNum++){
-                SheetParam sheetParam = excelParam.getSheetParams()[sheetNum];
                 //设置当前读取的sheet对象
                 excelParam.setSheetParam(sheetParam);
-                result.addAll(readSheet(wb.getSheetAt(sheetParam.getSheetIndex()),excelParam));
+                result.addAll(readSheet(sheet,excelParam));
             }
         }
         return result;
@@ -196,18 +202,17 @@ public class ExcelImportUtil {
         int length = sheet.getLastRowNum();
         //如果存在条数限制，判断条数，以及处理策略
         if(sheetParam.getLength()!=null && sheetParam.getLength()!=0){
-            if(sheetParam.getLength() < length - sheetParam.getTitleIndex()){
+            if(sheetParam.getLength() < length - start){
                 if(!sheetParam.isCompatible()){
                     throw new ExcelException("sheet:"+sheet.getSheetName()+"的读取条数超过最大条数限制");
                 }else{
-                    length = sheetParam.getLength() + sheetParam.getTitleIndex();
+                    length = sheetParam.getLength() + start;
                 }
             }
         }
         List<T> list = new ArrayList<>(length);
         //获取表头
         readTitle(sheet, excelParam);
-
         // 循环行Row
         for (; start <= length; start++) {
             Row row = sheet.getRow(start);

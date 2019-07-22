@@ -22,16 +22,17 @@ public class ExcelImportTest {
     public void downLoadTest() {
         SheetParam sheetParam = new SheetParam();
 //        sheetParam.setSheetIndex(0);
-        sheetParam.setTitleIndex(2);
+//        sheetParam.setTitleIndex(2);
 //        sheetParam.setStartIndex(3);
-        sheetParam.setLength(2);
-        sheetParam.setCompatible(true);
-        SheetParam sheetParam1 = new SheetParam();
-        sheetParam1.setSheetIndex(1);
+//        sheetParam.setLength(2);
+//        sheetParam.setCompatible(true);
+//        SheetParam sheetParam1 = new SheetParam();
+//        sheetParam1.setSheetIndex(4);
+//        sheetParam1.setSheetName("sheet2");
 //        sheetParam1.setTitleIndex(0);
 //        sheetParam.setStartIndex(3);
 //        sheetParam.setLength(3);
-        List<TestEntity> list = ExcelImportUtil.readExcel("D:\\Projects\\ExcelUtil\\src\\test\\resources\\test.xlsx", TestEntity.class,sheetParam,sheetParam1);
+        List<TestEntity> list = ExcelImportUtil.readExcel("D:\\Projects\\ExcelUtil\\src\\test\\resources\\test.xlsx", TestEntity.class);
         for (TestEntity entity:list) {
             System.out.println(entity.toString());
         }

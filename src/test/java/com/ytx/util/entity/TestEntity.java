@@ -2,6 +2,7 @@ package com.ytx.util.entity;
 
 import com.ytx.util.annotation.Excel;
 import com.ytx.util.annotation.ExcelField;
+import com.ytx.util.annotation.ExcelSheet;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -14,6 +15,10 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
+@Excel(sheet = {
+        @ExcelSheet(titleIndex = 2,startIndex = 4,length = 2),
+        @ExcelSheet(sheetIndex = 4,sheetName = "sheet2")
+})
 public class TestEntity {
 
     @ExcelField(title = "Id")

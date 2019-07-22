@@ -17,12 +17,12 @@ public @interface Excel {
      * 导出excel表名
      * @return
      */
-    String value();
+    String value() default "";
     /**
      * 默认读取的sheet，如果为空，读取全部
      * @return
      */
-    ExcelSheet[] sheet() ;
+    ExcelSheet[] sheet() default {};
 
 }
 
