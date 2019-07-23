@@ -129,7 +129,7 @@ public class ExcelExportUtil {
                         cell.setCellValue(fieldData.toString());
                     }
                 } catch (IllegalAccessException e) {
-                    throw new ExcelException("读写字段属性"+field.getAnnotation(ExcelField.class).title()+"失败："+e);
+                    throw new ExcelException("读写字段属性"+field.getAnnotation(ExcelField.class).value()+"失败："+e);
                 }
             }
         }
@@ -160,7 +160,7 @@ public class ExcelExportUtil {
             field.setAccessible(true);
             ExcelField excelField = field.getAnnotation(ExcelField.class);
             if (excelField != null && !excelField.ignore()) {
-                title.createCell(i++).setCellValue(excelField.title());
+                title.createCell(i++).setCellValue(excelField.value());
             }
         }
     }

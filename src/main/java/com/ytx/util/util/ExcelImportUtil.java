@@ -308,18 +308,23 @@ public class ExcelImportUtil {
                 throw new ExcelException("第" + (i + 1) + "列的值无法匹配字段属性");
             }
             if (field.getAnnotation(ExcelField.class).notNull() && (cell == null || ("").equals(cell.toString().trim()))) {
-                throw new ExcelException("第" + (i + 1) + "列的属性：" + field.getAnnotation(ExcelField.class).title() + "不能为空");
+                throw new ExcelException("第" + (i + 1) + "列的属性：" + field.getAnnotation(ExcelField.class).value() + "不能为空");
             }
             if (cell == null) {
                 continue;
             }
-            Object val = ExcelUtil.getValue(cell, field.getType());
+            Object val = null;
+            try{
+                val = ExcelUtil.getValue(cell, field);
+            }catch (Exception e){
+                throw new ExcelException("第" + (i + 1) + "列的属性：" + field.getAnnotation(ExcelField.class).value() + "的值获取失败:"+e.getMessage());
+            }
             if (val != null) {
                 field.setAccessible(true);
                 try {
                     field.set(t, val);
                 } catch (Exception e) {
-                    throw new ExcelException("第" + (i + 1) + "列的属性：" + field.getAnnotation(ExcelField.class).title() + "的值" + val + "注入失败");
+                    throw new ExcelException("第" + (i + 1) + "列的属性：" + field.getAnnotation(ExcelField.class).value() + "的值" + val + "注入失败");
                 }
             }
         }

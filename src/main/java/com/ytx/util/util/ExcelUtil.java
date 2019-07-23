@@ -2,6 +2,7 @@ package com.ytx.util.util;
 
 
 import com.ytx.util.annotation.Excel;
+import com.ytx.util.annotation.ExcelFieldChange;
 import com.ytx.util.annotation.ExcelSheet;
 import com.ytx.util.annotation.ExcelField;
 import com.ytx.util.entity.ExcelParam;
@@ -41,47 +42,74 @@ public class ExcelUtil implements Serializable {
     /**
      * 读取单元格值
      * @param cell 单元格
-     * @param clazz 单元格数据类型
+     * @param field 单元格字段
      * @return 单元格值
      */
-    public static Object getValue(Cell cell, Class clazz) {
+    public static Object getValue(Cell cell, Field field) {
+        ExcelFieldChange[] fieldChanges = field.getAnnotation(ExcelField.class).fieldChange();
+        Class clazz = field.getType();
         Object val = null;
         if (cell.getCellTypeEnum() == CellType.BOOLEAN) {
             val = cell.getBooleanCellValue();
         } else if (cell.getCellTypeEnum() == CellType.NUMERIC) {
+            double value = cell.getNumericCellValue();
             if (DateUtil.isCellDateFormatted(cell)) {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 if (clazz == String.class) {
-                    val = sdf.format(DateUtil.getJavaDate(cell.getNumericCellValue()));
+                    val = sdf.format(DateUtil.getJavaDate(value));
                 } else if (clazz == int.class || clazz == Integer.class) {
-                    val = DateUtil.getJavaDate(cell.getNumericCellValue()).getTime() / 1000;
+                    val = DateUtil.getJavaDate(value).getTime() / 1000;
                 } else if (clazz == long.class || clazz == Long.class) {
-                    val = DateUtil.getJavaDate(cell.getNumericCellValue()).getTime();
+                    val = DateUtil.getJavaDate(value).getTime();
                 } else {
-                    val = DateUtil.getJavaDate(cell.getNumericCellValue());
+                    val = DateUtil.getJavaDate(value);
                 }
             } else {
                 if (clazz == String.class) {
                     cell.setCellType(CellType.STRING);
                     val = cell.getStringCellValue();
                 } else if (clazz == BigDecimal.class) {
-                    val = new BigDecimal(cell.getNumericCellValue());
+                    val = new BigDecimal(value);
                 } else if (clazz == long.class || clazz == Long.class) {
-                    val = (long) cell.getNumericCellValue();
-                } else if (clazz == Double.class) {
-                    val = cell.getNumericCellValue();
-                } else if (clazz == Float.class) {
-                    val = (float) cell.getNumericCellValue();
+                    val = (long) value;
+                } else if (clazz == Double.class || clazz == double.class) {
+                    val = value;
+                } else if (clazz == Float.class || clazz == float.class) {
+                    val = (float) value;
                 } else if (clazz == int.class || clazz == Integer.class) {
-                    val = (int) cell.getNumericCellValue();
-                } else if (clazz == Short.class) {
-                    val = (short) cell.getNumericCellValue();
+                    val = (int) value;
+                } else if (clazz == Short.class || clazz == short.class) {
+                    val = (short) value;
                 } else {
-                    val = cell.getNumericCellValue();
+                    val = value;
                 }
             }
         } else if (cell.getCellTypeEnum() == CellType.STRING) {
             val = cell.getStringCellValue();
+        }
+        if(fieldChanges != null && fieldChanges.length > 0){
+            for(ExcelFieldChange fieldChange:fieldChanges){
+                if(val != null && fieldChange.value().equals(val.toString())){
+                    String key = fieldChange.key();
+                    if (clazz == BigDecimal.class) {
+                        val = new BigDecimal(key);
+                    } else if (clazz == long.class || clazz == Long.class) {
+                        val = Long.valueOf(key);
+                    } else if (clazz == Double.class || clazz == double.class) {
+                        val = Double.valueOf(key);
+                    } else if (clazz == Float.class|| clazz == float.class) {
+                        val = Float.valueOf(key);
+                    } else if (clazz == int.class || clazz == Integer.class) {
+                        val = Integer.valueOf(key);
+                    } else if (clazz == Short.class|| clazz == short.class) {
+                        val = Short.valueOf(key);
+                    }else if (clazz == Byte.class|| clazz == byte.class) {
+                        val = Byte.valueOf(key);
+                    }else if (clazz == Boolean.class|| clazz == boolean.class) {
+                        val = Boolean.valueOf(key);
+                    }
+                }
+            }
         }
         return val;
     }
@@ -159,9 +187,17 @@ public class ExcelUtil implements Serializable {
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
             ExcelField excelField = field.getAnnotation(ExcelField.class);
-            if (excelField != null && excelField.title() != null) {
-                if(!fieldsMap.containsKey(excelField.title()) || !fieldsMap.containsValue(field)){
-                    fieldsMap.put(excelField.title(), field);
+            if (excelField != null && StringUtils.isNotEmpty(excelField.value())) {
+                ExcelFieldChange[] fieldChanges = excelField.fieldChange();
+                if(fieldChanges != null && fieldChanges.length > 0){
+                    for(ExcelFieldChange fieldChange:fieldChanges){
+                        if(StringUtils.isEmpty(fieldChange.key()) || StringUtils.isEmpty(fieldChange.value())){
+                            throw new ExcelException("excel和java对象转换设置为空");
+                        }
+                    }
+                }
+                if(!fieldsMap.containsKey(excelField.value()) || !fieldsMap.containsValue(field)){
+                    fieldsMap.put(excelField.value(), field);
                 }
             }
         }

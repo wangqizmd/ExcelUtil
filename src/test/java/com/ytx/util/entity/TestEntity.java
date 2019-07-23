@@ -2,6 +2,7 @@ package com.ytx.util.entity;
 
 import com.ytx.util.annotation.Excel;
 import com.ytx.util.annotation.ExcelField;
+import com.ytx.util.annotation.ExcelFieldChange;
 import com.ytx.util.annotation.ExcelSheet;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -21,22 +22,25 @@ import lombok.experimental.Accessors;
 })
 public class TestEntity {
 
-    @ExcelField(title = "Id")
+    @ExcelField("Id")
     private Integer id;
 
-    @ExcelField(title = "问题名称")
+    @ExcelField(value = "问题名称")
     private String title;
 
-    @ExcelField(title = "一级目录名称")
+    @ExcelField("一级目录名称")
     private String firstMenu;
 
-    @ExcelField(title = "二级目录名称",notNull = false)
-    private String secondMenu;
+    @ExcelField(value = "二级目录名称",notNull = false,fieldChange = {
+            @ExcelFieldChange(key = "false",value = "测试1"),
+            @ExcelFieldChange(key = "true",value = "测试2")
+    })
+    private boolean secondMenu;
 
-    @ExcelField(title = "标准答案",ignore = true)
+    @ExcelField(value = "标准答案",ignore = true)
     private String answer;
 
-    @ExcelField(title = "数量")
+    @ExcelField("数量")
     private Integer num;
 
 }

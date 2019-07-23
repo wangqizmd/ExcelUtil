@@ -1,5 +1,7 @@
 package com.ytx.util.annotation;
 
+import org.springframework.core.annotation.AliasFor;
+
 import java.lang.annotation.*;
 
 /**
@@ -17,8 +19,13 @@ public @interface ExcelField {
      * 字段标题
      * @return
      */
-    String title();
+    String value() ;
 
+    /**
+     * excel和java对象转换，比如1-男，2-女
+     * @return
+     */
+    ExcelFieldChange[] fieldChange() default {};
     /**
      * 默认是否不为空
      * @return
