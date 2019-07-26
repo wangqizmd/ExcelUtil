@@ -1,5 +1,7 @@
 package com.ytx.util.annotation;
 
+import com.ytx.util.enums.ExcelType;
+
 import java.lang.annotation.*;
 
 /**
@@ -18,6 +20,13 @@ public @interface Excel {
      * @return
      */
     String value() default "";
+
+    /**
+     * 导出excel类型
+     * @return
+     */
+    ExcelType type() default ExcelType.XLS;
+
     /**
      * 默认读取的sheet，如果为空，读取全部
      * @return

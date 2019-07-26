@@ -24,19 +24,6 @@ import java.util.*;
  */
 public class ExcelImportUtil {
 
-    /**
-     * 默认sheet对象
-     */
-    private static SheetParam initSheetParam;
-
-    /**
-     * 初始化默认sheet对象
-     */
-    static {
-        initSheetParam = new SheetParam();
-        initSheetParam.setTitleIndex(0);
-        initSheetParam.setStartIndex(1);
-    }
 
     /**
      * 通过文件路径读取excel
@@ -124,13 +111,16 @@ public class ExcelImportUtil {
         if(excelParam.getSheetParams() == null || excelParam.getSheetParams().length == 0){
             for (int sheetNum = 0; sheetNum < numberOfSheets; sheetNum++) {
                 //设置当前读取的sheet对象为默认对象
-                excelParam.setSheetParam(initSheetParam);
+                excelParam.setSheetParam(ExcelUtil.initSheetParam);
                 result.addAll(readSheet(wb.getSheetAt(sheetNum), excelParam));
             }
         }else{
             //判断sheet，校验是否为空，是否重复
             Set set = new HashSet();
             for (SheetParam sheetParam: excelParam.getSheetParams()) {
+                if(sheetParam == null){
+                    continue;
+                }
                 int index = sheetParam.getSheetIndex();
                 String name = sheetParam.getSheetName();
                 Sheet sheet = null;
@@ -170,7 +160,7 @@ public class ExcelImportUtil {
         ExcelParam<T> excelParam = new ExcelParam();
         excelParam.setClazz(clazz);
         excelParam.setSheetParams(sheetParams);
-        excelParam.setSheetParam(initSheetParam);
+        excelParam.setSheetParam(ExcelUtil.initSheetParam);
         ExcelUtil.getExcelAnnotation(excelParam);
         if(excelParam.getSheetParams() != null && excelParam.getSheetParams().length != 0){
             excelParam.setSheetParam(excelParam.getSheetParams()[0]);
@@ -201,12 +191,12 @@ public class ExcelImportUtil {
         }
         int length = sheet.getLastRowNum();
         //如果存在条数限制，判断条数，以及处理策略
-        if(sheetParam.getLength()!=null && sheetParam.getLength()!=0){
-            if(sheetParam.getLength() < length - start){
+        if(sheetParam.getLength()!=null ){
+            if(sheetParam.getLength() < length - (start - 1)){
                 if(!sheetParam.isCompatible()){
-                    throw new ExcelException("sheet:"+sheet.getSheetName()+"的读取条数超过最大条数限制");
+                    throw new ExcelException("sheet:"+sheet.getSheetName()+"的读取条数超过最大条数限制"+sheetParam.getLength());
                 }else{
-                    length = sheetParam.getLength() + start;
+                    length = sheetParam.getLength() + (start-1);
                 }
             }
         }
@@ -247,8 +237,6 @@ public class ExcelImportUtil {
         int titleIndex = 0;
         if(sheetParam.getTitleIndex()!=null && sheetParam.getTitleIndex()!= 0){
             titleIndex = sheetParam.getTitleIndex();
-        }else{
-            sheetParam.setTitleIndex(0);
         }
         Row title = sheet.getRow(titleIndex);
         if (title == null) {
@@ -307,6 +295,11 @@ public class ExcelImportUtil {
             if(field ==null){
                 throw new ExcelException("第" + (i + 1) + "列的值无法匹配字段属性");
             }
+            //字段是否被忽略
+            if(field.getAnnotation(ExcelField.class).ignore()){
+                continue;
+            }
+            //字段是否为空
             if (field.getAnnotation(ExcelField.class).notNull() && (cell == null || ("").equals(cell.toString().trim()))) {
                 throw new ExcelException("第" + (i + 1) + "列的属性：" + field.getAnnotation(ExcelField.class).value() + "不能为空");
             }

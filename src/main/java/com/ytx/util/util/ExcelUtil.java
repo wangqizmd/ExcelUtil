@@ -23,10 +23,7 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author wangqi
@@ -35,9 +32,22 @@ import java.util.Map;
  * @description Excel工具类
  * @date 2019/7/8 11:16
  */
-public class ExcelUtil implements Serializable {
+class ExcelUtil implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    /**
+     * 默认sheet对象
+     */
+    protected static SheetParam initSheetParam;
+
+    /**
+     * 初始化默认sheet对象
+     */
+    static {
+        initSheetParam = new SheetParam();
+        initSheetParam.setTitleIndex(0).setStartIndex(1);
+    }
 
     /**
      * 读取单元格值
@@ -45,7 +55,7 @@ public class ExcelUtil implements Serializable {
      * @param field 单元格字段
      * @return 单元格值
      */
-    public static Object getValue(Cell cell, Field field) {
+    protected static Object getValue(Cell cell, Field field) {
         ExcelFieldChange[] fieldChanges = field.getAnnotation(ExcelField.class).fieldChange();
         Class clazz = field.getType();
         Object val = null;
@@ -114,12 +124,38 @@ public class ExcelUtil implements Serializable {
         return val;
     }
 
+    protected static <T> void getExcelParam(ExcelParam<T> excelParam,List<T> ...lists){
+        ExcelUtil.getExcelAnnotation(excelParam);
+        if(lists == null || lists.length==0){
+            throw new ExcelException("导出数据不能为空");
+        }
+        SheetParam<T>[] sheetParams = excelParam.getSheetParams();
+        if(sheetParams == null || sheetParams.length==0){
+            sheetParams = new SheetParam[lists.length];
+        }else{
+            sheetParams = Arrays.copyOf(sheetParams,lists.length);
+        }
+        for (int i = 0;i<lists.length;i++){
+            if(lists[i] == null){
+                throw new ExcelException("导出数据不能为空");
+            }
+            SheetParam<T> sheetParam = sheetParams[i];
+            if(sheetParam == null){
+                sheetParam = new SheetParam<>();
+                sheetParam.setSheetIndex(i).setSheetName("Sheet"+(i+1)).setTitleIndex(0).setStartIndex(1);
+            }
+            sheetParam.setList(lists[i]);
+            sheetParams[i] = sheetParam;
+        }
+        excelParam.setSheetParams(sheetParams);
+    }
+
     /**
      * 获取class对象所有的相关注解
      * 如果ExcelParam对象中存在该属性，则覆盖注解对象
      * @param excelParam excel参数对象
      */
-    public static<T> void getExcelAnnotation(ExcelParam excelParam) {
+    protected static<T> void getExcelAnnotation(ExcelParam excelParam) {
         Class<T> clazz = excelParam.getClazz();
         if(clazz ==null){
             throw new ExcelException("接收对象为空");
@@ -133,6 +169,9 @@ public class ExcelUtil implements Serializable {
         //获取文件名称
         if(StringUtils.isEmpty(excelParam.getFileName())&&!StringUtils.isEmpty(excel.value())){
             excelParam.setFileName(excel.value());
+        }
+        if(excelParam.getType() == null){
+            excelParam.setType(excel.type());
         }
         if((excelParam.getSheetParams() == null || excelParam.getSheetParams().length == 0) && excel.sheet()!= null && excel.sheet().length != 0){
             SheetParam[] excelSheets = new SheetParam[excel.sheet().length];

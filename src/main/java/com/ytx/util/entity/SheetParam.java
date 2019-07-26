@@ -1,9 +1,11 @@
 package com.ytx.util.entity;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -14,7 +16,8 @@ import java.util.Map;
  * @date 2019/7/16 14:49
  */
 @Data
-public class SheetParam implements Serializable {
+@Accessors(chain = true)
+public  class  SheetParam<T> implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -54,4 +57,9 @@ public class SheetParam implements Serializable {
      * 	value是字段Field
      */
     Map<Integer, Field> titleMap;
+
+    /**
+     * 导入需要的数据
+     */
+    List<T> list;
 }

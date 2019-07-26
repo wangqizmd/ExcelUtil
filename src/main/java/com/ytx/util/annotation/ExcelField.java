@@ -1,7 +1,5 @@
 package com.ytx.util.annotation;
 
-import org.springframework.core.annotation.AliasFor;
-
 import java.lang.annotation.*;
 
 /**
@@ -33,7 +31,7 @@ public @interface ExcelField {
     boolean notNull() default true;
 
     /**
-     * 导出默认是否忽略字段
+     * 默认是否忽略字段
      * @return
      */
     boolean ignore() default false;

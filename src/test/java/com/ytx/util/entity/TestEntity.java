@@ -18,14 +18,14 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @Excel(sheet = {
         @ExcelSheet(titleIndex = 2,startIndex = 4,length = 2),
-        @ExcelSheet(sheetIndex = 4,sheetName = "sheet2")
+        @ExcelSheet(sheetIndex = 4,sheetName = "sheet2",length = 2,compatible = true)
 })
 public class TestEntity {
 
     @ExcelField("Id")
     private Integer id;
 
-    @ExcelField(value = "问题名称")
+    @ExcelField("问题名称")
     private String title;
 
     @ExcelField("一级目录名称")
@@ -35,7 +35,7 @@ public class TestEntity {
             @ExcelFieldChange(key = "false",value = "测试1"),
             @ExcelFieldChange(key = "true",value = "测试2")
     })
-    private boolean secondMenu;
+    private Boolean secondMenu;
 
     @ExcelField(value = "标准答案",ignore = true)
     private String answer;
