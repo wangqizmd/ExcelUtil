@@ -4,6 +4,7 @@ import com.ytx.util.annotation.Excel;
 import com.ytx.util.annotation.ExcelField;
 import com.ytx.util.annotation.ExcelFieldChange;
 import com.ytx.util.annotation.ExcelSheet;
+import com.ytx.util.enums.ExcelType;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -16,8 +17,8 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-@Excel(sheet = {
-        @ExcelSheet(titleIndex = 2,startIndex = 4,length = 2),
+@Excel(type = ExcelType.XLSX,sheet = {
+        @ExcelSheet(titleIndex = 2,startIndex = 3),
         @ExcelSheet(sheetIndex = 4,sheetName = "sheet2",length = 2,compatible = true)
 })
 public class TestEntity {
@@ -31,11 +32,11 @@ public class TestEntity {
     @ExcelField("一级目录名称")
     private String firstMenu;
 
-    @ExcelField(value = "二级目录名称",notNull = false,fieldChange = {
-            @ExcelFieldChange(key = "false",value = "测试1"),
-            @ExcelFieldChange(key = "true",value = "测试2")
+    @ExcelField(value = "二级目录名称",notNull = true,fieldChange = {
+            @ExcelFieldChange(key = "1",value = "测试1"),
+            @ExcelFieldChange(key = "2",value = "测试2")
     })
-    private Boolean secondMenu;
+    private Integer secondMenu;
 
     @ExcelField(value = "标准答案",ignore = true)
     private String answer;

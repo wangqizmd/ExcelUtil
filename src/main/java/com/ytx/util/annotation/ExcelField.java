@@ -28,10 +28,10 @@ public @interface ExcelField {
      * 默认是否不为空
      * @return
      */
-    boolean notNull() default true;
+    boolean notNull() default false;
 
     /**
-     * 默认是否忽略字段
+     * 导入/导出默认是否忽略字段
      * @return
      */
     boolean ignore() default false;

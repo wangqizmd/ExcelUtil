@@ -236,6 +236,9 @@ public class ExcelImportUtil {
         }
         int titleIndex = 0;
         if(sheetParam.getTitleIndex()!=null && sheetParam.getTitleIndex()!= 0){
+            if(sheetParam.getTitleIndex() < 0){
+                throw new ExcelException("表头行序号设置有误，应该大于等于0");
+            }
             titleIndex = sheetParam.getTitleIndex();
         }
         Row title = sheet.getRow(titleIndex);
@@ -290,38 +293,41 @@ public class ExcelImportUtil {
 //            throw new ExcelException("列数不匹配");
 //        }
         for (int i = 0; i < row.getLastCellNum(); i++) {
-            Cell cell = row.getCell(i);
-            Field field = titleMap.get(i);
-            if(field ==null){
-                throw new ExcelException("第" + (i + 1) + "列的值无法匹配字段属性");
-            }
-            //字段是否被忽略
-            if(field.getAnnotation(ExcelField.class).ignore()){
-                continue;
-            }
-            //字段是否为空
-            if (field.getAnnotation(ExcelField.class).notNull() && (cell == null || ("").equals(cell.toString().trim()))) {
-                throw new ExcelException("第" + (i + 1) + "列的属性：" + field.getAnnotation(ExcelField.class).value() + "不能为空");
-            }
-            if (cell == null) {
-                continue;
-            }
-            Object val = null;
-            try{
-                val = ExcelUtil.getValue(cell, field);
-            }catch (Exception e){
-                throw new ExcelException("第" + (i + 1) + "列的属性：" + field.getAnnotation(ExcelField.class).value() + "的值获取失败:"+e.getMessage());
-            }
-            if (val != null) {
-                field.setAccessible(true);
-                try {
-                    field.set(t, val);
-                } catch (Exception e) {
-                    throw new ExcelException("第" + (i + 1) + "列的属性：" + field.getAnnotation(ExcelField.class).value() + "的值" + val + "注入失败");
-                }
-            }
+            readCell(row.getCell(i), titleMap, t, i);
         }
         return t;
+    }
+
+    private static <T> void readCell(Cell cell, Map<Integer, Field> titleMap, T t, int i) {
+        Field field = titleMap.get(i);
+        if(field ==null){
+            throw new ExcelException("第" + (i + 1) + "列的值无法匹配字段属性");
+        }
+        //字段是否被忽略
+        if(field.getAnnotation(ExcelField.class).ignore()){
+            return;
+        }
+        //字段是否为空
+        if (field.getAnnotation(ExcelField.class).notNull() && (cell == null || ("").equals(cell.toString().trim()))) {
+            throw new ExcelException("第" + (i + 1) + "列的属性：" + field.getAnnotation(ExcelField.class).value() + "不能为空");
+        }
+        if (cell == null) {
+            return;
+        }
+        Object val = null;
+        try{
+            val = ExcelUtil.getValue(cell, field);
+        }catch (Exception e){
+            throw new ExcelException("第" + (i + 1) + "列的属性：" + field.getAnnotation(ExcelField.class).value() + "的值获取失败:"+e.getMessage());
+        }
+        if (val != null) {
+            field.setAccessible(true);
+            try {
+                field.set(t, val);
+            } catch (Exception e) {
+                throw new ExcelException("第" + (i + 1) + "列的属性：" + field.getAnnotation(ExcelField.class).value() + "的值" + val + "注入失败");
+            }
+        }
     }
 
 }

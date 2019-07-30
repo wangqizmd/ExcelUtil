@@ -97,9 +97,11 @@ class ExcelUtil implements Serializable {
         } else if (cell.getCellTypeEnum() == CellType.STRING) {
             val = cell.getStringCellValue();
         }
-        if(fieldChanges != null && fieldChanges.length > 0){
+        if(val != null && fieldChanges != null && fieldChanges.length > 0){
+            boolean flag = false;
             for(ExcelFieldChange fieldChange:fieldChanges){
-                if(val != null && fieldChange.value().equals(val.toString())){
+                if(fieldChange.value().equals(val.toString())){
+                    flag = true;
                     String key = fieldChange.key();
                     if (clazz == BigDecimal.class) {
                         val = new BigDecimal(key);
@@ -117,8 +119,13 @@ class ExcelUtil implements Serializable {
                         val = Byte.valueOf(key);
                     }else if (clazz == Boolean.class|| clazz == boolean.class) {
                         val = Boolean.valueOf(key);
+                    }else{
+                        val = key;
                     }
                 }
+            }
+            if(!flag){
+                throw new ExcelException(field.getAnnotation(ExcelField.class).value()+"数据转换有误");
             }
         }
         return val;
@@ -166,13 +173,17 @@ class ExcelUtil implements Serializable {
         if(excel == null) {
             return;
         }
+        if(excelParam.getType() == null){
+            excelParam.setType(excel.type());
+        }
         //获取文件名称
         if(StringUtils.isEmpty(excelParam.getFileName())&&!StringUtils.isEmpty(excel.value())){
             excelParam.setFileName(excel.value());
         }
-        if(excelParam.getType() == null){
-            excelParam.setType(excel.type());
+        if(StringUtils.isEmpty(excelParam.getFileName())){
+            excelParam.setFileName(String.valueOf(System.currentTimeMillis()));
         }
+        excelParam.setFileName(excelParam.getFileName()+"."+excelParam.getType().getValue());
         if((excelParam.getSheetParams() == null || excelParam.getSheetParams().length == 0) && excel.sheet()!= null && excel.sheet().length != 0){
             SheetParam[] excelSheets = new SheetParam[excel.sheet().length];
             for(int i = 0;i < excel.sheet().length;i++){
@@ -219,11 +230,14 @@ class ExcelUtil implements Serializable {
         }
         Map<String, Field> fieldsMap = excelParam.getFieldsMap();
         if(fieldsMap == null){
-            fieldsMap = new HashMap();
+            fieldsMap = new LinkedHashMap<>();
             excelParam.setFieldsMap(fieldsMap);
         }
         // 获取所有支持导入导出的属性
         Field[] fields = clazz.getDeclaredFields();
+        if(fields == null || fields.length == 0){
+            throw new ExcelException("java对象不存在支持导入导出的属性");
+        }
         for (Field field : fields) {
             ExcelField excelField = field.getAnnotation(ExcelField.class);
             if (excelField != null && StringUtils.isNotEmpty(excelField.value())) {
@@ -239,6 +253,9 @@ class ExcelUtil implements Serializable {
                     fieldsMap.put(excelField.value(), field);
                 }
             }
+        }
+        if (MapUtils.isEmpty(fieldsMap)) {
+            throw new ExcelException("excel对象的字段注解为空");
         }
     }
 }

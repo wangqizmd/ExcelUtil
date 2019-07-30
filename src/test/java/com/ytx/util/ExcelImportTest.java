@@ -2,9 +2,12 @@ package com.ytx.util;
 
 import com.ytx.util.entity.SheetParam;
 import com.ytx.util.entity.TestEntity;
+import com.ytx.util.util.ExcelExportUtil;
 import com.ytx.util.util.ExcelImportUtil;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,6 +37,31 @@ public class ExcelImportTest {
                 TestEntity.class,sheetParam,sheetParam1,null);
         for (TestEntity entity:list) {
             System.out.println(entity.toString());
+        }
+    }
+
+    @Test
+    public void exportTest() {
+        TestEntity testEntity = new TestEntity();
+        testEntity.setId(1);
+        testEntity.setTitle("asdasd");
+        testEntity.setFirstMenu("测试1");
+//        testEntity.setSecondMenu(2);
+        testEntity.setAnswer("sfsdf");
+        List<TestEntity> list = new ArrayList<>();
+        list.add(testEntity);
+        list.add(testEntity);
+        list.add(testEntity);
+        list.add(testEntity);
+        List<TestEntity> list1 = new ArrayList<>();
+        list1.add(testEntity);
+        list1.add(testEntity);
+        list1.add(testEntity);
+        list1.add(testEntity);
+        try {
+            ExcelExportUtil.exportExcel(TestEntity.class,list,list1);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
